@@ -1,6 +1,8 @@
 import { Heart, ShoppingCart } from 'lucide-react';
 import { useState } from 'react';
 import type { Product } from '../data/products';
+import { useCart } from '../contexts/CartContext';
+import { useWishlist } from '../contexts/WishlistContext';
 
 interface ProductCardProps {
   product: Product;
@@ -8,7 +10,18 @@ interface ProductCardProps {
 
 const ProductCard = ({ product }: ProductCardProps) => {
   const [isHovered, setIsHovered] = useState(false);
-  const [isWishlisted, setIsWishlisted] = useState(false);
+  const { addToCart } = useCart();
+  const { toggleWishlist, isInWishlist } = useWishlist();
+
+  const isWishlisted = isInWishlist(product.id);
+
+  const handleAddToCart = async () => {
+    await addToCart(product.id);
+  };
+
+  const handleToggleWishlist = async () => {
+    await toggleWishlist(product.id);
+  };
 
   return (
     <div
@@ -31,7 +44,7 @@ const ProductCard = ({ product }: ProductCardProps) => {
 
         {/* Wishlist Button */}
         <button
-          onClick={() => setIsWishlisted(!isWishlisted)}
+          onClick={handleToggleWishlist}
           className={`absolute top-3 right-3 p-2 bg-white rounded-full shadow-md transition-all duration-300 ${
             isHovered ? 'opacity-100 translate-y-0' : 'opacity-0 -translate-y-2'
           } hover:bg-gray-100`}
@@ -44,6 +57,7 @@ const ProductCard = ({ product }: ProductCardProps) => {
 
         {/* Add to Cart Button */}
         <button
+          onClick={handleAddToCart}
           className={`absolute bottom-0 left-0 right-0 bg-black text-white py-3 font-medium transition-all duration-300 ${
             isHovered ? 'translate-y-0 opacity-100' : 'translate-y-full opacity-0'
           } hover:bg-gray-900 flex items-center justify-center gap-2`}
