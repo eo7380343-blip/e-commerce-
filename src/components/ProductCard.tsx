@@ -13,14 +13,14 @@ const ProductCard = ({ product }: ProductCardProps) => {
   const { addToCart } = useCart();
   const { toggleWishlist, isInWishlist } = useWishlist();
 
-  const isWishlisted = isInWishlist(product.id);
+  const isWishlisted = isInWishlist(String(product.id));
 
-  const handleAddToCart = async () => {
-    await addToCart(product.id);
+  const handleAddToCart = () => {
+    addToCart(String(product.id));
   };
 
-  const handleToggleWishlist = async () => {
-    await toggleWishlist(product.id);
+  const handleToggleWishlist = () => {
+    toggleWishlist(String(product.id));
   };
 
   return (
@@ -45,9 +45,7 @@ const ProductCard = ({ product }: ProductCardProps) => {
         {/* Wishlist Button */}
         <button
           onClick={handleToggleWishlist}
-          className={`absolute top-3 right-3 p-2 bg-white rounded-full shadow-md transition-all duration-300 ${
-            isHovered ? 'opacity-100 translate-y-0' : 'opacity-0 -translate-y-2'
-          } hover:bg-gray-100`}
+          className="absolute top-3 right-3 p-2 bg-white rounded-full shadow-md hover:bg-gray-100 transition-colors"
         >
           <Heart
             size={20}

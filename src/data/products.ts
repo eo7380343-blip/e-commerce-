@@ -148,3 +148,5 @@ export const bestSellers: Product[] = [
     discount: "50%"
   }
 ];
+
+export const products = [...newArrivals, ...bestSellers];

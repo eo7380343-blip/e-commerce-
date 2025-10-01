@@ -2,11 +2,13 @@ import { Search, ShoppingBag, Menu, X } from 'lucide-react';
 import { useState } from 'react';
 import { useCart } from '../contexts/CartContext';
 import { useSearch } from '../contexts/SearchContext';
+import CartSidebar from './CartSidebar';
 
 const Header = () => {
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const [isSearchOpen, setIsSearchOpen] = useState(false);
   const [searchInput, setSearchInput] = useState('');
+  const [isCartOpen, setIsCartOpen] = useState(false);
 
   const { cartCount } = useCart();
   const { setSearchQuery } = useSearch();
@@ -83,11 +85,16 @@ const Header = () => {
                 </button>
               )}
 
-              <button className="hover:opacity-70 transition-opacity relative">
+              <button
+                onClick={() => setIsCartOpen(true)}
+                className="hover:opacity-70 transition-opacity relative"
+              >
                 <ShoppingBag size={24} />
-                <span className="absolute -top-2 -right-2 bg-black text-white text-xs rounded-full w-5 h-5 flex items-center justify-center">
-                  {cartCount}
-                </span>
+                {cartCount > 0 && (
+                  <span className="absolute -top-2 -right-2 bg-black text-white text-xs rounded-full w-5 h-5 flex items-center justify-center">
+                    {cartCount}
+                  </span>
+                )}
               </button>
             </div>
           </div>
@@ -107,11 +114,16 @@ const Header = () => {
               <button onClick={() => setIsSearchOpen(!isSearchOpen)}>
                 <Search size={20} />
               </button>
-              <button className="relative">
+              <button
+                onClick={() => setIsCartOpen(true)}
+                className="relative"
+              >
                 <ShoppingBag size={20} />
-                <span className="absolute -top-2 -right-2 bg-black text-white text-xs rounded-full w-5 h-5 flex items-center justify-center">
-                  {cartCount}
-                </span>
+                {cartCount > 0 && (
+                  <span className="absolute -top-2 -right-2 bg-black text-white text-xs rounded-full w-5 h-5 flex items-center justify-center">
+                    {cartCount}
+                  </span>
+                )}
               </button>
             </div>
           </div>
@@ -152,6 +164,7 @@ const Header = () => {
           </ul>
         </div>
       </nav>
+      <CartSidebar isOpen={isCartOpen} onClose={() => setIsCartOpen(false)} />
     </header>
   );
 };
