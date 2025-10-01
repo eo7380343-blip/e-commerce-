@@ -1,17 +1,13 @@
-import { Search, ShoppingBag, Menu, X, User } from 'lucide-react';
+import { Search, ShoppingBag, Menu, X } from 'lucide-react';
 import { useState } from 'react';
-import { useAuth } from '../contexts/AuthContext';
 import { useCart } from '../contexts/CartContext';
 import { useSearch } from '../contexts/SearchContext';
-import LoginModal from './LoginModal';
 
 const Header = () => {
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
-  const [isLoginModalOpen, setIsLoginModalOpen] = useState(false);
   const [isSearchOpen, setIsSearchOpen] = useState(false);
   const [searchInput, setSearchInput] = useState('');
 
-  const { user, signOut } = useAuth();
   const { cartCount } = useCart();
   const { setSearchQuery } = useSearch();
 
@@ -28,7 +24,6 @@ const Header = () => {
 
   return (
     <header className="w-full">
-      {/* Top Bar */}
       <div className="bg-black text-white">
         <div className="container mx-auto px-4 py-2">
           <div className="flex justify-between items-center text-sm md:text-base" style={{ fontFamily: 'Roboto, sans-serif' }}>
@@ -45,7 +40,6 @@ const Header = () => {
         </div>
       </div>
 
-      {/* Middle Section - Logo and Icons */}
       <div className="hidden md:block border-b border-gray-200">
         <div className="container mx-auto px-4 py-4">
           <div className="flex justify-between items-center">
@@ -89,33 +83,6 @@ const Header = () => {
                 </button>
               )}
 
-              {user ? (
-                <div className="relative group">
-                  <button className="hover:opacity-70 transition-opacity flex items-center gap-2">
-                    <User size={24} />
-                  </button>
-                  <div className="absolute right-0 mt-2 w-48 bg-white rounded-lg shadow-lg py-2 opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all">
-                    <div className="px-4 py-2 text-sm text-gray-700 border-b">
-                      {user.email}
-                    </div>
-                    <button
-                      onClick={signOut}
-                      className="block w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
-                    >
-                      Sign Out
-                    </button>
-                  </div>
-                </div>
-              ) : (
-                <button
-                  onClick={() => setIsLoginModalOpen(true)}
-                  className="hover:opacity-70 transition-opacity flex items-center gap-2"
-                >
-                  <User size={24} />
-                  <span className="text-sm font-medium">Login</span>
-                </button>
-              )}
-
               <button className="hover:opacity-70 transition-opacity relative">
                 <ShoppingBag size={24} />
                 <span className="absolute -top-2 -right-2 bg-black text-white text-xs rounded-full w-5 h-5 flex items-center justify-center">
@@ -127,7 +94,6 @@ const Header = () => {
         </div>
       </div>
 
-      {/* Mobile Header */}
       <div className="md:hidden border-b border-gray-200">
         <div className="container mx-auto px-4 py-4">
           <div className="flex justify-between items-center">
@@ -141,15 +107,6 @@ const Header = () => {
               <button onClick={() => setIsSearchOpen(!isSearchOpen)}>
                 <Search size={20} />
               </button>
-              {user ? (
-                <button onClick={signOut}>
-                  <User size={20} />
-                </button>
-              ) : (
-                <button onClick={() => setIsLoginModalOpen(true)}>
-                  <User size={20} />
-                </button>
-              )}
               <button className="relative">
                 <ShoppingBag size={20} />
                 <span className="absolute -top-2 -right-2 bg-black text-white text-xs rounded-full w-5 h-5 flex items-center justify-center">
@@ -180,9 +137,6 @@ const Header = () => {
         </div>
       </div>
 
-      <LoginModal isOpen={isLoginModalOpen} onClose={() => setIsLoginModalOpen(false)} />
-
-      {/* Navigation Menu */}
       <nav className={`sticky top-0 bg-white border-b border-gray-200 z-50 ${isMobileMenuOpen ? 'block' : 'hidden md:block'}`}>
         <div className="container mx-auto px-4">
           <ul className="flex flex-col md:flex-row md:justify-center md:items-center gap-0 md:gap-8 py-0 md:py-4" style={{ fontFamily: 'Roboto, sans-serif' }}>

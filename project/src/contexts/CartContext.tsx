@@ -1,13 +1,16 @@
 import { createContext, useContext, useEffect, useState, ReactNode } from 'react';
-import { supabase, CartItem } from '../lib/supabase';
-import { useAuth } from './AuthContext';
+
+interface CartItem {
+  id: string;
+  productId: string;
+  quantity: number;
+}
 
 interface CartContextType {
   cartItems: CartItem[];
-  loading: boolean;
-  addToCart: (productId: string) => Promise<void>;
-  removeFromCart: (productId: string) => Promise<void>;
-  updateQuantity: (productId: string, quantity: number) => Promise<void>;
+  addToCart: (productId: string) => void;
+  removeFromCart: (productId: string) => void;
+  updateQuantity: (productId: string, quantity: number) => void;
   getCartItemQuantity: (productId: string) => number;
   cartCount: number;
 }
@@ -15,107 +18,47 @@ interface CartContextType {
 const CartContext = createContext<CartContextType | undefined>(undefined);
 
 export function CartProvider({ children }: { children: ReactNode }) {
-  const [cartItems, setCartItems] = useState<CartItem[]>([]);
-  const [loading, setLoading] = useState(false);
-  const { user } = useAuth();
-
-  const fetchCartItems = async () => {
-    if (!user) {
-      setCartItems([]);
-      return;
-    }
-
-    setLoading(true);
-    const { data, error } = await supabase
-      .from('cart_items')
-      .select('*')
-      .eq('user_id', user.id);
-
-    if (error) {
-      console.error('Error fetching cart items:', error);
-    } else {
-      setCartItems(data || []);
-    }
-    setLoading(false);
-  };
+  const [cartItems, setCartItems] = useState<CartItem[]>(() => {
+    const saved = localStorage.getItem('cart');
+    return saved ? JSON.parse(saved) : [];
+  });
 
   useEffect(() => {
-    fetchCartItems();
-  }, [user]);
+    localStorage.setItem('cart', JSON.stringify(cartItems));
+  }, [cartItems]);
 
-  const addToCart = async (productId: string) => {
-    if (!user) {
-      alert('Please sign in to add items to cart');
-      return;
-    }
-
-    const existingItem = cartItems.find(item => item.product_id === productId);
+  const addToCart = (productId: string) => {
+    const existingItem = cartItems.find(item => item.productId === productId);
 
     if (existingItem) {
-      await updateQuantity(productId, existingItem.quantity + 1);
+      updateQuantity(productId, existingItem.quantity + 1);
     } else {
-      const { data, error } = await supabase
-        .from('cart_items')
-        .insert({
-          user_id: user.id,
-          product_id: productId,
-          quantity: 1
-        })
-        .select()
-        .single();
-
-      if (error) {
-        console.error('Error adding to cart:', error);
-        alert('Failed to add item to cart');
-      } else {
-        setCartItems([...cartItems, data]);
-      }
+      const newItem: CartItem = {
+        id: Math.random().toString(36).substr(2, 9),
+        productId,
+        quantity: 1
+      };
+      setCartItems([...cartItems, newItem]);
     }
   };
 
-  const removeFromCart = async (productId: string) => {
-    if (!user) return;
-
-    const { error } = await supabase
-      .from('cart_items')
-      .delete()
-      .eq('user_id', user.id)
-      .eq('product_id', productId);
-
-    if (error) {
-      console.error('Error removing from cart:', error);
-      alert('Failed to remove item from cart');
-    } else {
-      setCartItems(cartItems.filter(item => item.product_id !== productId));
-    }
+  const removeFromCart = (productId: string) => {
+    setCartItems(cartItems.filter(item => item.productId !== productId));
   };
 
-  const updateQuantity = async (productId: string, quantity: number) => {
-    if (!user) return;
-
+  const updateQuantity = (productId: string, quantity: number) => {
     if (quantity <= 0) {
-      await removeFromCart(productId);
+      removeFromCart(productId);
       return;
     }
 
-    const { error } = await supabase
-      .from('cart_items')
-      .update({ quantity })
-      .eq('user_id', user.id)
-      .eq('product_id', productId);
-
-    if (error) {
-      console.error('Error updating quantity:', error);
-      alert('Failed to update quantity');
-    } else {
-      setCartItems(cartItems.map(item =>
-        item.product_id === productId ? { ...item, quantity } : item
-      ));
-    }
+    setCartItems(cartItems.map(item =>
+      item.productId === productId ? { ...item, quantity } : item
+    ));
   };
 
   const getCartItemQuantity = (productId: string): number => {
-    const item = cartItems.find(item => item.product_id === productId);
+    const item = cartItems.find(item => item.productId === productId);
     return item ? item.quantity : 0;
   };
 
@@ -123,7 +66,6 @@ export function CartProvider({ children }: { children: ReactNode }) {
 
   const value = {
     cartItems,
-    loading,
     addToCart,
     removeFromCart,
     updateQuantity,
